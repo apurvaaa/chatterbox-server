@@ -13,6 +13,12 @@ this file and include it in basic-server.js so that it actually works.
 **************************************************************/
 var qs = require('querystring');
 var dataBase = [];
+var defaultCorsHeaders = {
+  'access-control-allow-origin': '*',
+  'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'access-control-allow-headers': 'content-type, accept',
+  'access-control-max-age': 10 // Seconds.
+};
 
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
@@ -107,10 +113,5 @@ module.exports.requestHandler = requestHandler;
 //
 // Another way to get around this restriction is to serve you chat
 // client from this domain by setting up static file serving.
-var defaultCorsHeaders = {
-  'access-control-allow-origin': '*',
-  'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'access-control-allow-headers': 'content-type, accept',
-  'access-control-max-age': 10 // Seconds.
-};
+
 
