@@ -11,7 +11,7 @@ this file and include it in basic-server.js so that it actually works.
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
 **************************************************************/
-var qs = require('querystring');
+//var qs = require('querystring');
 var dataBase = [];
 var defaultCorsHeaders = {
   'access-control-allow-origin': '*',
@@ -39,66 +39,54 @@ var requestHandler = function(request, response) {
 
   // The outgoing status.
   var statusCode = 200;
-/*
+
   if (request.method === 'POST') {
     debugger;
+    var body = '';
     statusCode = 201;
     request.on('data', function (data) {
-      console.log('data : ' + request.data);
+      // console.log(' ---- data : ' + data);
       body += data;
+      // console.log(' ---- body : ' + body);
     });
 
     request.on('end', function () {
-      var post = qs.parse(body);
+      var post = JSON.parse(body);
+      console.log(' ------- post : ' + JSON.stringify(post));
+      dataBase.unshift(post);
+      console.log(' ------- DB : ' + JSON.stringify(dataBase));
     });
+    //data = {"username":"Jono","message":"Do my bidding!"}
+  }
 
-  }*/
+  if (request.url !== '/classes/messages') {
+   // statusCode = 404;
+    response.statusCode = 404; 
+    response.statusMessage = 'Not found';       // HTTP status 404: NotFound
+    response.end();
+  } else {
+    // See the note below about CORS headers.
+    var headers = defaultCorsHeaders;
 
-/*  var qs = require('querystring');
+    // Tell the client we are sending them plain text.
+    //
+    // You will need to change this if you are sending something
+    // other than plain text, like JSON or HTML.
+    headers['Content-Type'] = 'text/plain';
 
-function (request, response) {
-    if (request.method == 'POST') {
-        var body = '';
+    // .writeHead() writes to the request line and headers of the response,
+    // which includes the status and all headers.
+    response.writeHead(statusCode, headers);
 
-        request.on('data', function (data) {
-            body += data;
-
-            // Too much POST data, kill the connection!
-            // 1e6 === 1 * Math.pow(10, 6) === 1 * 1000000 ~~~ 1MB
-            if (body.length > 1e6)
-                request.connection.destroy();
-        });
-
-        request.on('end', function () {
-            var post = qs.parse(body);
-            // use post['blah'], etc.
-        });
-    }
-}*/
-
-
-
-  // See the note below about CORS headers.
-  var headers = defaultCorsHeaders;
-
-  // Tell the client we are sending them plain text.
-  //
-  // You will need to change this if you are sending something
-  // other than plain text, like JSON or HTML.
-  headers['Content-Type'] = 'text/plain';
-
-  // .writeHead() writes to the request line and headers of the response,
-  // which includes the status and all headers.
-  response.writeHead(statusCode, headers);
-
-  // Make sure to always call response.end() - Node may not send
-  // anything back to the client until you do. The string you pass to
-  // response.end() will be the body of the response - i.e. what shows
-  // up in the browser.
-  //
-  // Calling .end "flushes" the response's internal buffer, forcing
-  // node to actually send all the data over to the client.
-  response.end(JSON.stringify({results: []}));
+    // Make sure to always call response.end() - Node may not send
+    // anything back to the client until you do. The string you pass to
+    // response.end() will be the body of the response - i.e. what shows
+    // up in the browser.
+    //
+    // Calling .end "flushes" the response's internal buffer, forcing
+    // node to actually send all the data over to the client.
+    response.end(JSON.stringify({results: dataBase}));
+  }
 };
 
 console.log('-----------------------------------------------------------------------------------');
