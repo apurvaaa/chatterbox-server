@@ -11,6 +11,8 @@ this file and include it in basic-server.js so that it actually works.
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
 **************************************************************/
+var qs = require('querystring');
+var dataBase = [];
 
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
@@ -27,10 +29,48 @@ var requestHandler = function(request, response) {
   // Adding more logging to your server can be an easy way to get passive
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
-  console.log('Serving request type ' + request.method + ' for url ' + request.url);
+  console.log('Serving request type ' + request.method + ' for url ' + request.url );
 
   // The outgoing status.
   var statusCode = 200;
+/*
+  if (request.method === 'POST') {
+    debugger;
+    statusCode = 201;
+    request.on('data', function (data) {
+      console.log('data : ' + request.data);
+      body += data;
+    });
+
+    request.on('end', function () {
+      var post = qs.parse(body);
+    });
+
+  }*/
+
+/*  var qs = require('querystring');
+
+function (request, response) {
+    if (request.method == 'POST') {
+        var body = '';
+
+        request.on('data', function (data) {
+            body += data;
+
+            // Too much POST data, kill the connection!
+            // 1e6 === 1 * Math.pow(10, 6) === 1 * 1000000 ~~~ 1MB
+            if (body.length > 1e6)
+                request.connection.destroy();
+        });
+
+        request.on('end', function () {
+            var post = qs.parse(body);
+            // use post['blah'], etc.
+        });
+    }
+}*/
+
+
 
   // See the note below about CORS headers.
   var headers = defaultCorsHeaders;
@@ -52,8 +92,11 @@ var requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-  response.end('Hello, World!');
+  response.end(JSON.stringify({results: []}));
 };
+
+console.log('-----------------------------------------------------------------------------------');
+module.exports.requestHandler = requestHandler;
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
 // This code allows this server to talk to websites that
