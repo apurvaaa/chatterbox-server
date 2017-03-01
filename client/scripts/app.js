@@ -65,6 +65,7 @@ var app = {
       success: function(data) {
         // Don't bother if we have nothing to work with
         console.log('success !!, data : ' + data);
+        data = JSON.parse(data);
         if (!data.results || !data.results.length) { return; }
 
         // Store messages for caching later
@@ -101,7 +102,7 @@ var app = {
     app.stopSpinner();
     if (Array.isArray(messages)) {
       // Add all fetched messages that are in our current room
-      clearMessages
+      messages
         .filter(function(message) {
           return message.roomname === app.roomname ||
                  app.roomname === 'lobby' && !message.roomname;

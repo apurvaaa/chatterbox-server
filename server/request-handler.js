@@ -1,8 +1,11 @@
 
+var qs = require('querystring');
+var objectIdCounter = 0;
 var dataBase = [
   {
     username: 'me',
-    text: 'Hello world!'
+    text: 'Hello world!',
+    objectId: -1
   }
 ];
 var headers = {
@@ -32,55 +35,43 @@ var collectData = function(request, callback) {
   });
 
   request.on('end', function () {
-    var post = JSON.parse(body);
+    console.log('----body : ', body);
+    var post = qs.parse(body);
+    console.log(' ----- post : ', post);
     post.createdAt = new Date();
+    post.objectId = objectIdCounter++;
     // console.log(' ------- post : ' + JSON.stringify(post));
-    dataBase.unshift(post);
+    dataBase.push(post);
     // console.log(' ------- DB : ' + JSON.stringify(dataBase));
   });
 };
 
 var methods = {
-  'POST': function(request, callback) {
-    collectData(request, callback);
+  'POST': function(request, response) {
+    collectData(request, function(data) {
+      // TODO: get data
+    });
+    sendResponse(response, 'hello there', 201);
   },
-  'GET': function(response, dataBase, statusCode) {
-    sendResponse(response, {results: dataBase}, statusCode);
-  },
-  'OPTIONS': function(response, dataBase, statusCode) {
-    sendResponse(response, {results: dataBase}, statusCode);
+  'GET': function(request, response) {
+    sendResponse(response, {results: dataBase});
+  }, 
+  'OPTIONS': function(request, response) { 
+    sendResponse(response, {results: dataBase});
   }
 };
 
 var requestHandler = function(request, response) {
  
   console.log('Serving request type ' + request.method + ' for url ' + request.url );
-  if (request.url.indexOf('/classes/messages') !== 0) {
+  if (methods[request.method] &&  
+    (request.url.indexOf('/classes/messages') === 0 || 
+    request.url.indexOf('/classes/room') === 0)) {
+    methods[request.method](request, response);
+  } else {
     response.statusCode = 404; 
     response.statusMessage = 'Not found';       // HTTP status 404: NotFound
     response.end();
-  } else {
-   
-    var statusCode = 200;
-    if (request.method === 'POST') {
-      collectData(request);
-      statusCode = 201;
-      // data = {"username":"Jono","message":"Do my bidding!"}
-    }
-   
-    
-
-    if (request.method === 'OPTIONS') {
-      console.log('options in ');
-      console.log('request.header', request.headers);
-      response.writeHead(statusCode, headers);
-      response.end();
-    }
-
-    response.writeHead(statusCode, headers);
-
-  
-    response.end(JSON.stringify({results: dataBase}));
   }
 };
 module.exports.requestHandler = requestHandler;
